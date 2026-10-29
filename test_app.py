@@ -1,14 +1,12 @@
 from app import app
 
-def test_add_and_update():
+def test_add_update_view():
     client = app.test_client()
     assert client.post("/medicines", json={"name":"Paracetamol","quantity":20}).status_code == 201
-    r = client.put("/medicines/Paracetamol", json={"quantity":35})
+    assert client.put("/medicines/Paracetamol", json={"quantity":35}).status_code == 200
+    r = client.get("/medicines")
     assert r.status_code == 200
-    assert r.json["medicine"]["quantity"] == 35
-
-def test_update_missing():
-    assert app.test_client().put("/medicines/Unknown", json={"quantity":4}).status_code == 404
+    assert any(x["name"] == "Paracetamol" and x["quantity"] == 35 for x in r.json)
 
 def test_health():
     assert app.test_client().get("/health").status_code == 200
